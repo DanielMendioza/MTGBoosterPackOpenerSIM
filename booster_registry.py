@@ -137,35 +137,35 @@ REGISTRY["fin"] = {
 }
 
 
-"""
-Tarkir Booster
 
-6-7 Commons (set:tdm is:booster rarity:common)
--in 1.5% replace common with SPG (set:spg cn>=104 cn<=113) 
+# Tarkir Booster
 
-3 uncommons (set:tdm is:booster rarity:uncommon)
+# 6-7 Commons (set:tdm is:booster rarity:common)
+# -in 1.5% replace common with SPG (set:spg cn>=104 cn<=113) 
 
-1 Wildcard
--common 12.5%, uncommon 58.3%, rare 15.6% or mythic 2.5% (set:tdm is:booster rarity:x) where x is the rarity given
--common 4.6% or uncommon 3.8% showcase draconic frame card (set:tdm cn>=292 cn<=326)
--rare 1.3% or mythic 0.2% borderless clan card 
-(Set:tdm 
--rare 0.6% among borderless sagas, sieges and lands or a borderless mythic rare Elspeth storm slayer <1% (set:tdm cn>=383 cn<=398)
--Rare 0.2% or Mythic 0.1% borderless reversible dragon (set:tdm r:rare or mythic cn>=377 cn<=382)
+# 3 uncommons (set:tdm is:booster rarity:uncommon)
 
-1 Rare or Mythic
--A rare 75% or Mythic 12.5 from main set (set:tdm is:booster r:rare or mythic)
--A rare 0.8% mythic 0.6% showcase draconic frame
--A rare 6.4% or mythic 1.2% borderless clan card
--A rare 2.7% among borderless sagas, sieges and lands or a borderless mythic 0.1% rare Elspeth storm slayer (set:tdm cn>=383 cn<=398)
--A rare 0.8% or mythic 0.9% borderless reversible dragon (set:tdm r:rare or mythic cn>=377 cn<=382)
+# 1 Wildcard
+# -common 12.5%, uncommon 58.3%, rare 15.6% or mythic 2.5% (set:tdm is:booster rarity:x) where x is the rarity given
+# -common 4.6% or uncommon 3.8% showcase draconic frame card (set:tdm cn>=292 cn<=326)
+# -rare 1.3% or mythic 0.2% borderless clan card 
+# (Set:tdm 
+# -rare 0.6% among borderless sagas, sieges and lands or a borderless mythic rare Elspeth storm slayer <1% (set:tdm cn>=383 cn<=398)
+# -Rare 0.2% or Mythic 0.1% borderless reversible dragon (set:tdm r:rare or mythic cn>=377 cn<=382)
 
-1 Traditional foil card of any rarity
--Common 56.5%, uncommon 32%, rare 6.4% mythic 1.1% from main set (set:tdm is:booster is:foil rarity:x)
--Common 1.6%, uncommon 1.4%, rare <1% or mythic rare <1% showcase draconic frame
--Rare 0.5% or mythic 0.1% borderless clan card
--Rare 0.2% from among borderless sagas, sieges and lands or a borderless mythic <1% rare Elspeth storm slayer
-"""
+# 1 Rare or Mythic
+# -A rare 75% or Mythic 12.5 from main set (set:tdm is:booster r:rare or mythic)
+# -A rare 0.8% mythic 0.6% showcase draconic frame
+# -A rare 6.4% or mythic 1.2% borderless clan card
+# -A rare 2.7% among borderless sagas, sieges and lands or a borderless mythic 0.1% rare Elspeth storm slayer (set:tdm cn>=383 cn<=398)
+# -A rare 0.8% or mythic 0.9% borderless reversible dragon (set:tdm r:rare or mythic cn>=377 cn<=382)
+
+# 1 Traditional foil card of any rarity
+# -Common 56.5%, uncommon 32%, rare 6.4% mythic 1.1% from main set (set:tdm is:booster is:foil rarity:x)
+# -Common 1.6%, uncommon 1.4%, rare <1% or mythic rare <1% showcase draconic frame
+# -Rare 0.5% or mythic 0.1% borderless clan card
+# -Rare 0.2% from among borderless sagas, sieges and lands or a borderless mythic <1% rare Elspeth storm slayer
+
 # TDM — SPG replaces a common ~1.5%
 # --- TDM: Khans of Tarkir Redux (Play Booster) ---
 REGISTRY["tdm"] = {
@@ -350,12 +350,36 @@ REGISTRY["fdn"] = {
     "bonus_sheet_cn_range": (74, 83),
     
     "rare_table":[
-        {"weight": 78,   "treatment": "regular",    "query": "set:fdn is:booster rarity:rare"},
-        {"weight": 12.8, "treatment": "regular",    "query": "set:fdn is:booster rarity:mythic"}
-        {"weight": 7.7,  "treatment": "Borderless", "query:"}       
+        #rare or myhthic
+        {"weight": 78,   "treatment": "regular",    "query": "set:fdn is:booster r:rare"},
+        {"weight": 12.8, "treatment": "regular",    "query": "set:fdn is:booster r:mythic"},
+        {"weight": 7.7,  "treatment": "borderless", "query": "set:fdn is:borderless r:r"},
+        {"weight": 1.5,  "treatment": "borderless", "query": "set:fdn is:borderless r:m"},
     ],
-    "wildcard_table":[],
-    "foil_table":[],
+    
+    "wildcard_table":[
+        # traditional non-foil weight
+        {"weight": 16.7,  "treatment": "regular",   "query": "set:fdn is:booster r:common"},
+        {"weight": 58.3,  "treatment": "regular",   "query": "set:fdn is:booster r:uncommon"},
+        {"weight": 16.3,  "treatment": "regular",   "query": "set:fdn is:booster r:rare"},
+        {"weight": 2.6,   "treatment": "regular",   "query": "set:fdn is:booster r:mythic"},
+        
+        # borderless cards, common, uncommon, 
+        {"weight": 1.8,  "treatment": "borderless", "query": "set:fdn is:borderless r:c"},
+        {"weight": 2.4,  "treatment": "borderless", "query": "set:fdn is:borderless r:u"},
+        {"weight": 1.6,  "treatment": "borderless", "query": "set:fdn is:borderless r:r"},
+        {"weight": 0.3,  "treatment": "borderless", "query": "set:fdn is:borderless r:m"},  
+    ],
+
+    #finish u the foils
+    "foil_table":[
+        # same weight for traditional foils as wildcard non-foils
+        {"weight": 16.7,  "treatment": "regular",   "query": "set:fdn is:booster is:foil r:common"},
+        {"weight": 58.3,  "treatment": "regular",   "query": "set:fdn is:booster is:foil r:uncommon"},
+        {"weight": 16.3,  "treatment": "regular",   "query": "set:fdn is:booster is:foil r:rare"},
+        {"weight": 2.6,   "treatment": "regular",   "query": "set:fdn is:booster is:foil r:mythic"},
+        
+    ],
     
     "token count": 1,
 }
