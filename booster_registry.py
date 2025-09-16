@@ -60,7 +60,7 @@ REGISTRY: Dict[str, Dict[str, Any]] = {
 # SET ENTRIES
 # -----------------------------
 
-# FIN (Bloomburrow) — simplified (“collapsed”) odds into base rarity buckets
+# FIN (Bloomburrow)
 REGISTRY["fin"] = {
     **REGISTRY["_default"],
     "set_code": "fin",
@@ -139,35 +139,6 @@ REGISTRY["fin"] = {
 
 
 # Tarkir Booster
-
-# 6-7 Commons (set:tdm is:booster rarity:common)
-# -in 1.5% replace common with SPG (set:spg cn>=104 cn<=113) 
-
-# 3 uncommons (set:tdm is:booster rarity:uncommon)
-
-# 1 Wildcard
-# -common 12.5%, uncommon 58.3%, rare 15.6% or mythic 2.5% (set:tdm is:booster rarity:x) where x is the rarity given
-# -common 4.6% or uncommon 3.8% showcase draconic frame card (set:tdm cn>=292 cn<=326)
-# -rare 1.3% or mythic 0.2% borderless clan card 
-# (Set:tdm 
-# -rare 0.6% among borderless sagas, sieges and lands or a borderless mythic rare Elspeth storm slayer <1% (set:tdm cn>=383 cn<=398)
-# -Rare 0.2% or Mythic 0.1% borderless reversible dragon (set:tdm r:rare or mythic cn>=377 cn<=382)
-
-# 1 Rare or Mythic
-# -A rare 75% or Mythic 12.5 from main set (set:tdm is:booster r:rare or mythic)
-# -A rare 0.8% mythic 0.6% showcase draconic frame
-# -A rare 6.4% or mythic 1.2% borderless clan card
-# -A rare 2.7% among borderless sagas, sieges and lands or a borderless mythic 0.1% rare Elspeth storm slayer (set:tdm cn>=383 cn<=398)
-# -A rare 0.8% or mythic 0.9% borderless reversible dragon (set:tdm r:rare or mythic cn>=377 cn<=382)
-
-# 1 Traditional foil card of any rarity
-# -Common 56.5%, uncommon 32%, rare 6.4% mythic 1.1% from main set (set:tdm is:booster is:foil rarity:x)
-# -Common 1.6%, uncommon 1.4%, rare <1% or mythic rare <1% showcase draconic frame
-# -Rare 0.5% or mythic 0.1% borderless clan card
-# -Rare 0.2% from among borderless sagas, sieges and lands or a borderless mythic <1% rare Elspeth storm slayer
-
-# TDM — SPG replaces a common ~1.5%
-# --- TDM: Khans of Tarkir Redux (Play Booster) ---
 REGISTRY["tdm"] = {
     **REGISTRY["_default"],
     "set_code": "tdm",
@@ -258,7 +229,7 @@ REGISTRY["tdm"] = {
 }
 
 
-# DFT — SPG replaces a common
+# DFT
 # --- DFT: Aetherdrift (Play Booster) ---
 REGISTRY["dft"] = {
     **REGISTRY["_default"],
@@ -335,6 +306,7 @@ REGISTRY["dft"] = {
     "token_count": 1,
 }
 
+# FDN — SPG replaces a common; wildcard=foil distribution per your notes
 
 REGISTRY["fdn"] = {
     **REGISTRY["_default"],
@@ -384,16 +356,7 @@ REGISTRY["fdn"] = {
     "token count": 1,
 }
 
-# FDN — SPG replaces a common; wildcard=foil distribution per your notes
-# REGISTRY["fdn"] = {
-#     **REGISTRY["_default"],
-#     "set_code": "fdn",
-#     "rare_weights": {"rare": 0.8584070796460177, "mythic": 0.1415929203539823},
-#     "wildcard_weights": {"common": 0.185, "uncommon": 0.607, "rare": 0.179, "mythic": 0.029},
-#     "foil_weights": {"common": 0.185, "uncommon": 0.607, "rare": 0.179, "mythic": 0.029},
-#     "bonus_chance": 0.015,
-#     "bonus_sheet_code": "spg",
-# }
+
 
 # WOE — Enchanting Tales (WOT) bonus card is ADDED (not a replacement)
 REGISTRY["woe"] = {
@@ -461,7 +424,7 @@ REGISTRY["clb"] = {
     ],
 }
 
-# OTJ — Breaking News (OTP)
+# OTJ — Breaking News (OTP), Big Score (BIG)
 REGISTRY["otj"] = {
     **REGISTRY["_default"],
     "set_code": "otj",
@@ -491,25 +454,7 @@ REGISTRY["mh3"] = {
     "bonus_sheet_code": None,
 }
 
-# ---------------------------------
 # EOE — Edge of Eternities (NEW)
-#6 common card: (set:eoe is:booster rarity:common)
-#special guests: (set:spg cn>=119 cn<=128) between 119 and 128 only 1.8% chance of replacing a common
-#3 uncommon card: (set:eoe is:booster rarity:uncommon)
-#1 wildcard: (12.5% common, 62.5% uncommon, 10.6% rare, or <1% mythic) regular frame
-# or 10% rare (set:eos rarity:rare) or 2.5% mythic rare (set:eos rarity:mythic) stellar sights land
-# or 1% rare or <1% mythic borderless viewport land (set:eoe is:showcase t:land) excluding secluded starforge (cn:366)
-# or <1% rare or <1% mythic borderless triumphant or surreal space card (set:eoe is:borderless -is:showcase -t:basic) excluding Sothera, the supervoid (cn:382)
-#1 rare or mythic card: 
-# 80.4% rare (set:eoe r:rare is:booster) or 14.2% mythic (set:eoe r:mythic is:booster) from main set
-# or 2% rare / <1% mythic borderless triumphant card (set:eoe cn>=307 cn<=316 r:rare/r:mythic) only way i can separate both categories
-# or 2% rare / <1% surreal space (set:eoe cn>=287 cn<=302 rarity:rare / r:mythic) respectively per rarity
-#1 traditional foil of any rarity: 
-# 58% common, 32% uncommon, 6.4% rare or 1.1% mythic (set:eoe is:foil is:booster) from the main set. Note:retrieve price for foil card, not the usual
-# or 1% rare or <1% mythic stellar sights land (set:eos is:foil rarity:mythic/rarity:rare)
-# or <1% rare or <1% mythic borderless viewport, triumphant, or surreal space card (set:eoe rarity:mythic/rarity:rare is:foil cn>=277 cn<=316)
-# dont worry about the land and token
-# ---------------------------------
 REGISTRY["eoe"] = {
     **REGISTRY["_default"],
     "set_code": "eoe",
