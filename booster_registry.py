@@ -534,3 +534,87 @@ REGISTRY["eoe"] = {
         {"weight": 0.9, "treatment": "borderless surreal space", "query": "set:eoe is:foil is:borderless -is:showcase -t:basic cn>=287 cn<=302 r:mythic", "foil": True},
     ],
 }
+
+
+# Streets of New Capenna (SNC) — registry entry
+REGISTRY["snc"] = {
+    **REGISTRY["_default"],
+    "set_code": "snc",
+
+    # core slots
+    "common_slots": 3,
+    "uncommon_slots": 3,
+
+    # Rare table (base guaranteed rare/mythic slot) — weights sum ~100
+    "rare_table": [
+        # main set (cn 001–261)
+        {"weight": 78.0, "treatment": "regular", "query": "set:snc cn<=261 r:rare"},
+        {"weight": 12.8, "treatment": "regular", "query": "set:snc cn<=261 r:mythic"},
+
+        # small borderless planeswalker / borderless bucket (cn 282–295)
+        {"weight": 1.5, "treatment": "borderless", "query": "set:snc cn>=282 cn<=295 r:rare"},
+        {"weight": 0.7, "treatment": "borderless", "query": "set:snc cn>=282 cn<=295 r:mythic"},
+
+        # Golden Age Showcase (cn 296–340)
+        {"weight": 3.5, "treatment": "Golden Age Showcase", "query": "set:snc cn>=296 cn<=340 r:rare"},
+        {"weight": 1.2, "treatment": "Golden Age Showcase", "query": "set:snc cn>=296 cn<=340 r:mythic"},
+
+        # Art Deco Showcase (cn 341–349)
+        {"weight": 1.0, "treatment": "Art Deco Showcase", "query": "set:snc cn>=341 cn<=349 r:rare"},
+        {"weight": 0.8, "treatment": "Art Deco Showcase", "query": "set:snc cn>=341 cn<=349 r:mythic"},
+
+        # Skyscraper Land Showcase (cn 350–359) — rare showcase lands
+        {"weight": 0.5, "treatment": "Skyscraper Land Showcase", "query": "set:snc cn>=350 cn<=359 r:rare"},
+    ],
+
+    # Wildcard table (two wildcards per set booster normally; single-table entry used by open_booster)
+    "wildcard_table": [
+        # Regular main set
+        {"weight": 30.0, "treatment": "regular", "query": "set:snc cn<=261 r:common"},
+        {"weight": 40.0, "treatment": "regular", "query": "set:snc cn<=261 r:uncommon"},
+        {"weight": 20.0, "treatment": "regular", "query": "set:snc cn<=261 r:rare"},
+        {"weight": 5.0,  "treatment": "regular", "query": "set:snc cn<=261 r:mythic"},
+
+        # Borderless (rare/mythic only) — small slice
+        {"weight": 0.5, "treatment": "borderless", "query": "set:snc cn>=282 cn<=295 r:rare"},
+        {"weight": 0.5, "treatment": "borderless", "query": "set:snc cn>=282 cn<=295 r:mythic"},
+
+        # Golden Age Showcase (all rarities)
+        {"weight": 1.0,  "treatment": "Golden Age Showcase", "query": "set:snc cn>=296 cn<=340 r:common"},
+        {"weight": 0.7,  "treatment": "Golden Age Showcase", "query": "set:snc cn>=296 cn<=340 r:uncommon"},
+        {"weight": 0.15, "treatment": "Golden Age Showcase", "query": "set:snc cn>=296 cn<=340 r:rare"},
+        {"weight": 0.15, "treatment": "Golden Age Showcase", "query": "set:snc cn>=296 cn<=340 r:mythic"},
+
+        # Art Deco Showcase (rare/mythic only)
+        {"weight": 0.5, "treatment": "Art Deco Showcase", "query": "set:snc cn>=341 cn<=349 r:rare"},
+        {"weight": 0.5, "treatment": "Art Deco Showcase", "query": "set:snc cn>=341 cn<=349 r:mythic"},
+
+        # Skyscraper Land Showcase (rare only)
+        {"weight": 0.5, "treatment": "Skyscraper Land Showcase", "query": "set:snc cn>=350 cn<=359 r:rare"},
+
+        # Commander exclusives from NCC (very small)
+        {"weight": 0.3, "treatment": "commander", "query": "set:ncc cn>=1 cn<=85 r:rare"},
+        {"weight": 0.2, "treatment": "commander", "query": "set:ncc cn>=1 cn<=85 r:mythic"},
+    ],
+
+    # Foil slot: 1 gilded or foil card (gilded CNs 361–405)
+    "foil_table": [
+        # main set foils
+        {"weight": 60.0, "treatment": "regular", "query": "set:snc is:booster is:foil r:common", "foil": True},
+        {"weight": 30.0, "treatment": "regular", "query": "set:snc is:booster is:foil r:uncommon", "foil": True},
+        {"weight": 7.5,  "treatment": "regular", "query": "set:snc is:booster is:foil r:rare", "foil": True},
+        {"weight": 0.5,  "treatment": "regular", "query": "set:snc is:booster is:foil r:mythic", "foil": True},
+
+        # gilded foils (special visual treatment) — cn:361–405
+        {"weight": 2.0, "treatment": "gilded", "query": "set:snc is:foil cn>=361 cn<=405", "foil": True},
+    ],
+
+    # Hooks: add extra rare hook (it will return extra rare pulls to append)
+    "hooks": [
+        {"name": "snc_extra_rares"}
+    ],
+
+    # other non-essential metadata
+    "token_count": 1,
+}
+

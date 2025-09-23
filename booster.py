@@ -213,6 +213,49 @@ def fin_uncommon_specials_hook(slot_name: str, set_code: dict, params: Optional[
         card["x_treatment"] = treatment
     return card
 
+def snc_extra_rares_hook(slot_name: str, ctx: dict, params: dict = None):
+    """
+    SNC: ~27% packs get +1 extra rare (total 2),
+         ~3% get +2 extra rares (total 3),
+         ~0.5-1% get +3 extra rares (total 4).
+    This hook should be registered in REGISTRY['snc'] as a hook named "snc_extra_rares".
+    When called for slot_name == "rare" it returns a list of card dicts to be appended.
+    """
+    if ctx.get("set_code") != "snc" or slot_name != "rare":
+        return None
+
+    r = random.random()
+    extras = 0
+    # thresholds selected to match approx. 27% / 3% / <1%
+    if r < 0.005:         # 0.5% → total 4 rares (+3 extras)
+        extras = 3
+    elif r < 0.035:       # 3.0% total for 3 rares (0.5% + 2.5%); adjust slightly
+        extras = 2
+    elif r < 0.305:       # 27.0% (approx) total for 2 rares
+        extras = 1
+    else:
+        extras = 0
+
+    if extras == 0:
+        return None
+
+    pulls: List[Dict[str, Any]] = []
+    rare_table = ctx.get("rare_table") or REGISTRY.get("snc", {}).get("rare_table")
+    if not rare_table:
+        # fallback: pull main set rares
+        for _ in range(extras):
+            c = fetch_random_card(set_code="snc", rarity="rare")
+            if c: pulls.append(c)
+        return pulls if pulls else None
+
+    # pick from the same rare_table used for the base rare (but avoid infinite recursion)
+    for _ in range(extras):
+        entry = pick_from_table(rare_table)
+        # fetch via the table's query (keeps the same treatment/collector-number constraints)
+        card = _fetch_with_meta(entry["query"], entry.get("treatment"))
+        if card:
+            pulls.append(card)
+    return pulls or None
 
 
 # =========================
@@ -280,6 +323,7 @@ def _resolve_hooks(cfg: dict):
         "otj_breaking_news": otj_breaking_news_hook,
         "clb_specials": clb_specials_hook,
         "fin_uncommon_specials": fin_uncommon_specials_hook,
+        "snc_extra_rares": snc_extra_rares_hook,
 
     }
     resolved: List[Callable[[str, dict], Optional[Any]]] = []
@@ -425,7 +469,7 @@ def main():
 
         firstSet = ask("First set: ")
         secondSet = ask("Second set: ")
-        rounds = input("How many boosters? (Rounds)").strip() # investigate a way to while loop this u
+        rounds = int(input("How many boosters? (Rounds)").strip()) # investigate a way to while loop this u
         totals = {firstSet: 0.0, secondSet: 0.0}
 
         for i in range(rounds): # rounds to make finals be 5v5 boosters
