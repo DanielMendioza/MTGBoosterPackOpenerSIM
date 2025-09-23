@@ -545,6 +545,10 @@ REGISTRY["snc"] = {
     "common_slots": 3,
     "uncommon_slots": 3,
 
+    "uncommon_showcase_slot": [
+        {"weight": 0.0, "treatment": "Uncommon Showcase", "query": "set:snc is:showcase r<=u"}
+    ],
+    
     # Rare table (base guaranteed rare/mythic slot) — weights sum ~100
     "rare_table": [
         # main set (cn 001–261)
@@ -567,6 +571,7 @@ REGISTRY["snc"] = {
         {"weight": 0.5, "treatment": "Skyscraper Land Showcase", "query": "set:snc cn>=350 cn<=359 r:rare"},
     ],
 
+    # still to fix the weights as every slot has the same chance to get a common than a mythic
     # Wildcard table (two wildcards per set booster normally; single-table entry used by open_booster)
     "wildcard_table": [
         # Regular main set
@@ -600,10 +605,10 @@ REGISTRY["snc"] = {
     # Foil slot: 1 gilded or foil card (gilded CNs 361–405)
     "foil_table": [
         # main set foils
-        {"weight": 60.0, "treatment": "regular", "query": "set:snc is:booster is:foil r:common", "foil": True},
-        {"weight": 30.0, "treatment": "regular", "query": "set:snc is:booster is:foil r:uncommon", "foil": True},
-        {"weight": 7.5,  "treatment": "regular", "query": "set:snc is:booster is:foil r:rare", "foil": True},
-        {"weight": 0.5,  "treatment": "regular", "query": "set:snc is:booster is:foil r:mythic", "foil": True},
+        {"weight": 60.0, "treatment": "regular", "query": "set:snc cn>=1 cn<=261 is:foil r:common", "foil": True},
+        {"weight": 30.0, "treatment": "regular", "query": "set:snc cn>=1 cn<=261 is:foil r:uncommon", "foil": True},
+        {"weight": 7.5,  "treatment": "regular", "query": "set:snc cn>=1 cn<=261 is:foil r:rare", "foil": True},
+        {"weight": 0.5,  "treatment": "regular", "query": "set:snc cn>=1 cn<=261 is:foil r:mythic", "foil": True},
 
         # gilded foils (special visual treatment) — cn:361–405
         {"weight": 2.0, "treatment": "gilded", "query": "set:snc is:foil cn>=361 cn<=405", "foil": True},

@@ -214,48 +214,43 @@ def fin_uncommon_specials_hook(slot_name: str, set_code: dict, params: Optional[
     return card
 
 def snc_extra_rares_hook(slot_name: str, ctx: dict, params: dict = None):
-    """
-    SNC: ~27% packs get +1 extra rare (total 2),
-         ~3% get +2 extra rares (total 3),
-         ~0.5-1% get +3 extra rares (total 4).
-    This hook should be registered in REGISTRY['snc'] as a hook named "snc_extra_rares".
-    When called for slot_name == "rare" it returns a list of card dicts to be appended.
-    """
+    # SNC: ~27% packs get +1 extra rare (total 2),
+    #      ~3% get +2 extra rares (total 3),
+    #      ~0.5% get +3 extra rares (total 4).
+    # Returns a single card dict each time so the caller
+    # can append directly, not a list.
     if ctx.get("set_code") != "snc" or slot_name != "rare":
         return None
 
     r = random.random()
     extras = 0
-    # thresholds selected to match approx. 27% / 3% / <1%
-    if r < 0.005:         # 0.5% → total 4 rares (+3 extras)
+    if r < 0.005:   # ~0.5% → 4 rares
         extras = 3
-    elif r < 0.035:       # 3.0% total for 3 rares (0.5% + 2.5%); adjust slightly
+    elif r < 0.035: # ~3% → 3 rares
         extras = 2
-    elif r < 0.305:       # 27.0% (approx) total for 2 rares
+    elif r < 0.305: # ~27% → 2 rares
         extras = 1
-    else:
-        extras = 0
 
     if extras == 0:
         return None
 
-    pulls: List[Dict[str, Any]] = []
     rare_table = ctx.get("rare_table") or REGISTRY.get("snc", {}).get("rare_table")
     if not rare_table:
-        # fallback: pull main set rares
-        for _ in range(extras):
-            c = fetch_random_card(set_code="snc", rarity="rare")
-            if c: pulls.append(c)
-        return pulls if pulls else None
+        return None
 
-    # pick from the same rare_table used for the base rare (but avoid infinite recursion)
-    for _ in range(extras):
+    # return one extra card dict per call until we've given out all extras
+    # stash count in ctx so we know how many remain
+    ctx.setdefault("_snc_extra_remaining", extras)
+
+    if ctx["_snc_extra_remaining"] > 0:
+        ctx["_snc_extra_remaining"] -= 1
         entry = pick_from_table(rare_table)
-        # fetch via the table's query (keeps the same treatment/collector-number constraints)
-        card = _fetch_with_meta(entry["query"], entry.get("treatment"))
-        if card:
-            pulls.append(card)
-    return pulls or None
+        return _fetch_with_meta(entry["query"], entry.get("treatment"))
+
+    return None
+
+
+
 
 
 # =========================
@@ -389,7 +384,17 @@ def open_booster(setCode: str):
     # --- rare/mythic slot ---
     if config.get("rare_table"):
         entry = pick_from_table(config["rare_table"])
-        card = _fetch_with_meta(entry["query"], entry.get("treatment"))
+        base_card = _fetch_with_meta(entry["query"], entry.get("treatment"))
+        booster.append(base_card)
+
+        # --- SNC extra rares hook ---
+        if setCode== "snc":
+            ctx = {"set_code": setCode, "rare_table": config["rare_table"]}
+            while True:
+                extra = snc_extra_rares_hook("rare", ctx)
+                if not extra:
+                    break
+                booster.append(extra)
         # hooks can override if they intercept this slot
         for hook in hooks:
             override = hook("rare_slot", config)
@@ -405,8 +410,10 @@ def open_booster(setCode: str):
 
     # --- wildcard slot ---
     if config.get("wildcard_table"):
-        entry = pick_from_table(config["wildcard_table"])
-        booster.append(_fetch_with_meta(entry["query"], entry.get("treatment")))
+        slots = 2 if setCode == "snc" else 1 # exception because streets of new capenna draws 2 wildcards
+        for _ in range(slots):
+            entry = pick_from_table(config["wildcard_table"])
+            booster.append(_fetch_with_meta(entry["query"], entry.get("treatment")))
     else:
         wc = pick_weighted(config["wildcard_weights"])
         card = None
