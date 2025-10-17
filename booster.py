@@ -1,6 +1,6 @@
 # booster.py — unified opener driven by booster_registry.REGISTRY (query-driven, readable)
 
-import requests, random, time  # type: ignore
+import requests, random, time 
 from typing import Dict, Any, Callable, Optional, List, Tuple
 
 from booster_registry import REGISTRY, FETCHLAND_NAMES
@@ -35,7 +35,7 @@ def color_emojis(card: Dict[str, Any]) -> str:
         # still empty → colorless
     if not colorIdentity:
         return "⚙️"
-    return "".join(mapping.get(c, "⚙️") for c in colorIdentity)
+    return "".join(mapping.get(c, "⚙️ ") for c in colorIdentity)
 
 def _is_legendary(card: dict) -> bool:
     if not card: return False
@@ -45,9 +45,9 @@ def _is_legendary(card: dict) -> bool:
     sup = card.get("supertypes") or []
     return any(str(s).lower() == "legendary" for s in sup)
 
-# =========================
-# Fetch helpers (now support raw Scryfall query)
-# =========================
+# ==================================================================================================== #
+# Fetching functions                                                                                   #
+# ==================================================================================================== #
 
 def fetch_random_card(
     set_code: Optional[str] = None,
@@ -124,41 +124,45 @@ def fetch_bonus_sheet_card(cfg: Dict[str, Any]) -> Optional[Dict[str, Any]]:
             pass
     return None
 
-# =========================
-# Hooks (DSK / OTJ / CLB / FIN)
-# =========================
+# ==================================================================================================== #
+# Hooks For Extra Logic                                                                                #
+# ==================================================================================================== #
 
+# --- DSK Lurking Evil Hook ---
 def dsk_lurking_hook(slot_name: str, set_code: dict, params: Optional[dict] = None):
-    if set_code.get("set_code") != "dsk": 
+    if set_code.get("set_code") != "dsk":
         return None
-    lurkingEvil = (params or set_code.get("lurking_evil") or {}).copy()
-    collectorNum = (lurkingEvil.get("cn") or {}).copy()
+
+    lurking_evil = (params or set_code.get("lurking_evil") or {}).copy()
+    collector_num = (lurking_evil.get("cn") or {}).copy()
 
     if slot_name == "common":
-        if random.random() < lurkingEvil.get("common_chance", 0.0):
-            num = random.choice(collectorNum.get("common", []))
+        if random.random() < lurking_evil.get("common_chance", 0.0):
+            num = random.choice(collector_num.get("common", []))
             if num:
                 return fetch_random_card("dsk", "common", collector_number=num)
 
     if slot_name == "uncommon":
         r = random.random()
-        le_p = lurkingEvil.get("uncommon_le_chance", 0.0)
-        pf_p = lurkingEvil.get("uncommon_pf_chance", 0.0)
-        if r < le_p:
-            num = random.choice(collectorNum.get("uncommon", []))
+        le_chance = lurking_evil.get("uncommon_le_chance", 0.0)
+        pf_chance = lurking_evil.get("uncommon_pf_chance", 0.0)
+        if r < le_chance:
+            num = random.choice(collector_num.get("uncommon", []))
             if num:
                 return fetch_random_card("dsk", "uncommon", collector_number=num)
-        elif r < le_p + pf_p:
-            num = random.choice(lurkingEvil.get("pf_uncommon_numbers", []))
+        elif r < le_chance + pf_chance:
+            num = random.choice(lurking_evil.get("pf_uncommon_numbers", []))
             if num:
                 return fetch_random_card("dsk", "uncommon", collector_number=num)
     return None
 
+# --- OTJ Breaking News Hook ---
 def otj_breaking_news_hook(slot_name: str, set_code: dict, params: Optional[dict] = None):
-    if set_code.get("set_code") != "otj": 
+    if set_code.get("set_code") != "otj":
         return None
-    if slot_name != "post": 
+    if slot_name != "post":
         return None
+
     p = params or {}
     odds = p.get("otp_odds", {"uncommon": 0.667, "rare": 0.285, "mythic": 0.048})
     sheet = p.get("otp_sheet_code", "otp")
@@ -166,29 +170,32 @@ def otj_breaking_news_hook(slot_name: str, set_code: dict, params: Optional[dict
     card = fetch_random_card(set_override=sheet, rarity=rarity)
     return [card] if card else None
 
+# --- CLB Specials Hook ---
 def clb_specials_hook(slot_name: str, set_code: dict, params: Optional[dict] = None):
-    if set_code.get("set_code") != "clb": 
+    if set_code.get("set_code") != "clb":
         return None
-    if slot_name != "post": 
+    if slot_name != "post":
         return None
+
     p = params or {}
-    hookOut: List[Dict[str,Any]] = []
+    hook_out: List[Dict[str, Any]] = []
 
     def maybe_add(item: dict):
-        if not item or not item.get("enabled", True): 
+        if not item or not item.get("enabled", True):
             return
         freq = item.get("frequency", 0.0)
         if random.random() <= freq:
             rarity = pick_weighted(item.get("rarities", {"rare": 1.0}))
-            bonusSheetCode = item.get("sheet_code") or "clb"
-            card = fetch_random_card(set_override=bonusSheetCode, rarity=rarity)
-            if card: hookOut.append(card)
+            bonus_sheet_code = item.get("sheet_code") or "clb"
+            card = fetch_random_card(set_override=bonus_sheet_code, rarity=rarity)
+            if card:
+                hook_out.append(card)
 
     maybe_add(p.get("foil_etched_legendary_bg"))
     maybe_add(p.get("legendary_creature_pw"))
     maybe_add(p.get("legendary_background"))
 
-    return hookOut or None
+    return hook_out or None
 
 def fin_uncommon_specials_hook(slot_name: str, set_code: dict, params: Optional[dict] = None):
     """FIN: 0.3% chance an uncommon is a borderless woodblock or character card."""
@@ -249,15 +256,42 @@ def snc_extra_rares_hook(slot_name: str, ctx: dict, params: dict = None):
 
     return None
 
+def snc_showcase_guarantee_hook(slot_name: str, ctx: dict, params: dict = None):
+    """Ensure every SNC Set Booster has at least one showcase-style card."""
+    if ctx.get("set_code") != "snc" or slot_name != "post":
+        return None
+
+    showcase_terms = ("golden age showcase", "skyscraper land showcase", "art deco showcase")
+    if any(
+        (c.get("x_treatment") or "").lower() in showcase_terms
+        for c in ctx.get("_booster_cards", [])
+    ):
+        return None  # already satisfied
+
+    # 90% chance Golden Age, 10% Skyscraper
+    if random.random() < 0.9:
+        query = "set:snc cn>=296 cn<=340"
+        treatment = "Golden Age Showcase"
+    else:
+        query = "set:snc cn>=350 cn<=359"
+        treatment = "Skyscraper Land Showcase"
+
+    card = fetch_random_card(raw_query=query)
+    if card:
+        card["x_treatment"] = treatment
+        return card
+    return None
 
 
 
 
-# =========================
-# Display helpers
-# =========================
 
-def display_card(card: Optional[Dict[str,Any]], is_foil=False) -> float:
+# ==================================================================================================== #
+# Display functions                                                                                    #
+# -This is where we change how the output looks like-                                                  #
+# ==================================================================================================== #
+
+def display_card(card: Optional[Dict[str,Any]], is_foil=False, extra_prefix: str = "") -> float:
     if not card: return 0.0
     name = card.get("name","Unknown")
     rarity = card.get("rarity","unknown")
@@ -279,7 +313,7 @@ def display_card(card: Optional[Dict[str,Any]], is_foil=False) -> float:
     head = " ".join(parts)
 
     price_str = f"{value} €" if value else "N/A"
-    print(f"{head} {name} {price_str}")
+    print(f"{extra_prefix}{head} {name} {price_str}")
 
     try:
         return float(value) if value else 0.0
@@ -290,20 +324,56 @@ def display_card(card: Optional[Dict[str,Any]], is_foil=False) -> float:
 def display_booster(booster, foil, bonus, token_count, suspense=True):
     print("\nYour Booster Pack:\n")
     total = 0.0
-    for i, card in enumerate(booster, 1):
-        print(f"{i:02}. ", end="")#waits 2 seccpnds
-        total += display_card(card)
-        if suspense: time.sleep(3 if card and card.get("rarity") in {"rare","mythic"} else 2)
+    # Identify wildcard slots: last N cards, where N = 2 for SNC, else 1 if wildcard_table exists
+    wild_count = 0
+    if booster:
+        if hasattr(booster, "__len__"):
+            if len(booster) >= 2 and "snc" in (booster[0].get("set", "") if booster[0] else ""):
+                wild_count = 2
+            elif "wildcard_table" in globals() or "wildcard_table" in locals():
+                wild_count = 1
+            elif any("wild" in (c.get("x_treatment", "") if c else "") for c in booster):
+                wild_count = 1
+        # fallback: use config if available
+    # More robust: use config if available, but for now, fallback to last 2 for SNC, else last 1 if wildcard_table exists
+    # Find how many wildcards by checking for "wildcard_table" in config if you want to improve further
+
+    # Find how many wildcards by checking for "wildcard_table" in config if you want to improve further
+    # For now, let's just check the last 2 for SNC, else last 1 if wildcard_table exists
+    # But best is to pass wild_count as argument from open_booster if you want to be 100% accurate
+
+    # Let's instead just mark the last 2 cards as wild for SNC, else last 1 if wildcard_table exists
+    # But for now, let's just mark the last 2 for SNC, else last 1 if wildcard_table exists
+
+    # Find wild slot indices
+    wild_indices = set()
+    if booster:
+        if len(booster) >= 2 and (booster[-2] and booster[-2].get("set_code", "") == "snc" or booster[-1] and booster[-1].get("set_code", "") == "snc"):
+            wild_indices = {len(booster)-2, len(booster)-1}
+        else:
+            wild_indices = {len(booster)-1}
+
+    for i, card in enumerate([c for c in booster if c], 1):
+        wild_str = ""
+        if (i-1) in wild_indices:
+            wild_str = "(Wild) "
+        print(f"{i:02}. ", end="")
+        total += display_card(card, extra_prefix=wild_str)
+        if suspense:
+            time.sleep(3 if card and card.get("rarity") in {"rare", "mythic"} else 2)
+
 
     if foil:
         print("\n✨ Foil:")
         total += display_card(foil, is_foil=True)
-        if suspense: time.sleep(2)
+        if suspense:
+            time.sleep(2)
 
     if bonus:
         print("\n📜 Bonus Sheet:")
         total += display_card(bonus)
-        if suspense: time.sleep(2)
+        if suspense:
+            time.sleep(2)
 
     print(f"\n🎟️ Tokens/Art Cards: {token_count}")
     print(f"💰 Total Pack Value: {total:.2f}€")
@@ -319,6 +389,7 @@ def _resolve_hooks(cfg: dict):
         "clb_specials": clb_specials_hook,
         "fin_uncommon_specials": fin_uncommon_specials_hook,
         "snc_extra_rares": snc_extra_rares_hook,
+        "snc_showcase_guarantee": snc_showcase_guarantee_hook,
 
     }
     resolved: List[Callable[[str, dict], Optional[Any]]] = []
@@ -390,16 +461,19 @@ def open_booster(setCode: str):
         # --- SNC extra rares hook ---
         if setCode== "snc":
             ctx = {"set_code": setCode, "rare_table": config["rare_table"]}
+            snc_extras_added = False
             while True:
                 extra = snc_extra_rares_hook("rare", ctx)
                 if not extra:
                     break
                 booster.append(extra)
+                snc_extras_added = True
         # hooks can override if they intercept this slot
         for hook in hooks:
             override = hook("rare_slot", config)
             card = override or card
-        booster.append(card)
+        if card is not None and not snc_extras_added:
+            booster.append(card)
     else:
         rareWeights = pick_weighted(config["rare_weights"])
         card = None
@@ -410,7 +484,8 @@ def open_booster(setCode: str):
 
     # --- wildcard slot ---
     if config.get("wildcard_table"):
-        slots = 2 if setCode == "snc" else 1 # exception because streets of new capenna draws 2 wildcards
+        slots = config.get("wildcard_slots", 1)
+
         for _ in range(slots):
             entry = pick_from_table(config["wildcard_table"])
             booster.append(_fetch_with_meta(entry["query"], entry.get("treatment")))

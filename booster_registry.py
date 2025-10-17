@@ -544,6 +544,8 @@ REGISTRY["snc"] = {
     # core slots
     "common_slots": 3,
     "uncommon_slots": 3,
+    "wildcard_slots": 2,
+
 
     "uncommon_showcase_slot": [
         {"weight": 0.0, "treatment": "Uncommon Showcase", "query": "set:snc is:showcase r<=u"}
@@ -605,19 +607,21 @@ REGISTRY["snc"] = {
     # Foil slot: 1 gilded or foil card (gilded CNs 361–405)
     "foil_table": [
         # main set foils
-        {"weight": 60.0, "treatment": "regular", "query": "set:snc cn>=1 cn<=261 is:foil r:common", "foil": True},
-        {"weight": 30.0, "treatment": "regular", "query": "set:snc cn>=1 cn<=261 is:foil r:uncommon", "foil": True},
-        {"weight": 7.5,  "treatment": "regular", "query": "set:snc cn>=1 cn<=261 is:foil r:rare", "foil": True},
+        {"weight": 58.0, "treatment": "regular", "query": "set:snc cn>=1 cn<=261 is:foil r:common", "foil": True},
+        {"weight": 29.0, "treatment": "regular", "query": "set:snc cn>=1 cn<=261 is:foil r:uncommon", "foil": True},
+        {"weight": 7.0,  "treatment": "regular", "query": "set:snc cn>=1 cn<=261 is:foil r:rare", "foil": True},
         {"weight": 0.5,  "treatment": "regular", "query": "set:snc cn>=1 cn<=261 is:foil r:mythic", "foil": True},
 
         # gilded foils (special visual treatment) — cn:361–405
-        {"weight": 2.0, "treatment": "gilded", "query": "set:snc is:foil cn>=361 cn<=405", "foil": True},
+        {"weight": 4.0, "treatment": "gilded", "query": "set:snc is:foil cn>=361 cn<=405", "foil": True},
     ],
 
     # Hooks: add extra rare hook (it will return extra rare pulls to append)
     "hooks": [
-        {"name": "snc_extra_rares"}
+        {"name": "snc_extra_rares"},
+        {"name": "snc_showcase_guarantee"}
     ],
+
 
     # other non-essential metadata
     "token_count": 1,
